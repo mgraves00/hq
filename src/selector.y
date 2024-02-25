@@ -36,6 +36,10 @@
 #include "hq.h"
 
 // second yacc parser. rename duplicate functions / variables
+#ifdef YYPREFIX
+#undef YYPREFIX
+#endif
+#define YYPREFIX "sel"
 #define yylex sel_yylex
 #define yylval sel_lval
 #define yyparse sel_parse
@@ -65,6 +69,7 @@
 #define yyaccept sel_accept
 #define yyabort sel_abort
 #define yyoverflow sel_overflow
+
 
 int                     yylex(void);
 
@@ -287,7 +292,7 @@ yylex(void)
 		}
 		st++; p++;
 		if ((yylval.v.string = extract_str(st,p)) == NULL)
-			fatal("yylex: extract_str");
+			fatal("%slex: extract_str",YYPREFIX);
 		return(STRING);
 	}
 	/* compress multiple spaces into single space */
@@ -311,7 +316,7 @@ yylex(void)
 	if (c != EOF)
 		lungetc(c);
 	if ((yylval.v.string = extract_str(st,p)) == NULL)
-		fatal("yylex: extract_str");
+		fatal("%slex: extract_str",YYPREFIX);
 	return(STRING);
 }
 

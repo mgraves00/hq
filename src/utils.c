@@ -107,9 +107,7 @@ int
 lgetc(int notused)
 {
 	int c;
-//printf("off = %lu size = %lu\n",raw_off,raw_size);
 	if (raw_off >= raw_size) {
-//printf("sending eof\n");
 		return(EOF);
 	}
 	c = raw_data[raw_off];

@@ -3,7 +3,7 @@
 #ifndef HQ_H
 #define HQ_H
 
-#define fatal(a)	errx(1,a)
+#define fatal(a...)	errx(1,a)
 
 // dom structure
 struct attr_elem {

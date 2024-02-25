@@ -52,20 +52,20 @@ int inelem;
 
 %}
 %token DOCTYPE
-%token  <v.string>      STRING
-%token  <v.string>      TEXT
-%token  <v.string>      COMMENT
+%token 	<v.string>      STRING
+%token	<v.string>      TEXT
+%token	<v.string>      COMMENT
 %type	<v.attr>		attr
 
 
 %%
 
-dom			: /* empty */
-			| dom '<' doctype '>'
-			| dom '<' '/' endelem '>'
-			| dom '<' fullelem '>'
-			| dom '<' comment '>'
-			| dom text
+html		: /* empty */
+			| html '<' doctype '>'
+			| html '<' '/' endelem '>'
+			| html '<' fullelem '>'
+			| html '<' comment '>'
+			| html text
 			;
 
 doctype		: DOCTYPE STRING {
@@ -76,7 +76,7 @@ doctype		: DOCTYPE STRING {
 				e->value = $2;
 				e->type = DOMF_DOCT;
 				e->line = yylval.lineno;
-				TAILQ_INSERT_TAIL(head, e, next);
+				TAILQ_INSERT_HEAD(head, e, next);	// doctype will always be part of the head
 		 	}
 		 	;
 
@@ -204,10 +204,7 @@ yylex(void)
 			yylval.lineno++;
 		c = lgetc(0);
 	}
-
-//printf("checking: %d: '%c'(%d)\n",inelem,c,c);
 	if (c == EOF) {
-//printf("trying to stop lex\n");
 		return(0);
 	}
 	if (c == '<') {
@@ -238,7 +235,7 @@ yylex(void)
 					p++;
 				}
 				if ((yylval.v.string = extract_str(st,p)) == NULL)
-					fatal("yylex: extract_str");
+					fatal("%slex: extract_str",YYPREFIX);
 				return(STRING);
 				break;
 			case '/':
@@ -258,7 +255,7 @@ yylex(void)
 						while(c != EOF) {
 							if (c == '-' && (c = lgetc(0)) == '-' && (c = lgetc(0)) == '>') {
 								if ((yylval.v.string = extract_str(st,p)) == NULL)
-									fatal("yylex: extract_str");
+									fatal("%slex: extract_str",YYPREFIX);
 								lungetc(c);
 								return(COMMENT);
 							}
@@ -272,7 +269,7 @@ yylex(void)
 							p++;
 						}
 						if ((yylval.v.string = extract_str(st,p)) == NULL)
-									fatal("yylex: extract_str");
+									fatal("%slex: extract_str",YYPREFIX);
 						if (strcasecmp(yylval.v.string,"DOCTYPE") == 0) {
 							free(yylval.v.string);
 							yylval.v.string = NULL;
@@ -293,13 +290,12 @@ yylex(void)
 					p++;
 				}
 				if ((yylval.v.string = extract_str(st,p)) == NULL)
-							fatal("yylex: extract_str");
+							fatal("%slex: extract_str",YYPREFIX);
 				lungetc(c);
 				return(STRING);
 				break;
 		}	// switch(c)
 	}	// inelem
-
 	/* not in an element */
 	st = p = raw_data + raw_off-1;
 	yylval.st_lineno = yylval.lineno;
@@ -311,7 +307,7 @@ yylex(void)
 	}
 	lungetc(c);
 	if ((yylval.v.string = extract_str(st,p)) == NULL)
-		fatal("yylex: extract_str");
+		fatal("%slex: extract_str",YYPREFIX);
 	return(TEXT);
 }
 
@@ -330,9 +326,6 @@ parse_dom(struct domhead *dh, char *raw, size_t sz)
 	inelem = 0;
 	errors = 0;
 	yylval.lineno = 1;
-
-//printf("size = %lu\n",raw_size);
-//printf("off  = %lu\n",raw_off);
 
 	yyparse();
 	return(errors);

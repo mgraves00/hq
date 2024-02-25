@@ -98,15 +98,6 @@ main(int argc, char **argv)
 		read_file(fd, &raw, &raw_len);
 		close(fd);
 	}
-#if 0
-printf("raw = %s\n",raw);
-printf("len = %lu  strlen = %lu\n",raw_len,strlen(raw));
-	for (int i=0; i < raw_len; i++) {
-		printf("%d = '%c'\n",i, raw[i]);
-	}
-	printf("\n");
-	exit(1);
-#endif
 	
 	TAILQ_INIT(&dh);
 	TAILQ_INIT(&sh);
@@ -161,30 +152,10 @@ read_stdin(int fp, char **buf, size_t *buflen)
 	ssize_t rlen;
 	char	tbuf[1024];
 	size_t	off = 0;
-#if 0
-	size_t sz;
-#endif
 	char	*p;
 
 	*buf = NULL;
 	bzero(tbuf,sizeof(tbuf));
-#if 0
-//	if (fcntl(fp, F_SETFL, O_NONBLOCK) == -1)
-//		err(1,"fcntl");
-	while ((rlen = read(fp, tbuf, 1024)) != -1 && rlen != 0)  {
-		if (rlen <= (ssize_t)sizeof(tbuf)) { // read all
-			if ((p = recallocarray(*buf, off-1, rlen, 1)) == NULL) {
-				err(1,"recallocarray");
-			}
-			if ((sz = strlcat(p, tbuf, rlen)) >= off+rlen) {
-				errx(1,"buffercopy failed sz=%lu off=%lu",sz,off+rlen);
-			}
-			*buf = p;
-			off = off+rlen;
-		}
-	}
-	*buflen = off-1;
-#else
 	while ((rlen = read(fp, tbuf, 1024)) != -1 && rlen != 0) {
 		if ((p = realloc(*buf, off+rlen)) == NULL) {
 			free(*buf);
@@ -198,11 +169,9 @@ read_stdin(int fp, char **buf, size_t *buflen)
 			free(*buf);
 			err(1,"realloc");
 	}
-	off++;
-	p[off] = '\0';
+	p[off+1] = '\0';
 	*buf = p;
 	*buflen = off;
-#endif
 	return(0);
 }
 
