@@ -17,6 +17,5 @@ See the [LICENSE](LICENSE) file for details.
 - add ability to print specific element attribute / value
 
 # Known issues
-- reading from stdin is broken.
 - currently only tested / compiled on OpenBSD
 
