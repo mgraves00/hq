@@ -1,0 +1,236 @@
+.\" $Id$
+.\"
+.\" Copyright (c) 2024 Michael Graves
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt HQ 1
+.Os
+.Sh NAME
+.Nm hq
+.Nd reads and parses html file based on CSS selectors
+.Sh SYNOPSIS
+.Nm hq
+.Op Fl a Ar attr_name[,attr_name]
+.Op Fl c
+.Op Fl d
+.Op Fl f Ar htmlfile
+.Op Fl h
+.Op Fl p
+.Op Fl t
+.Ar CSSselector
+.Sh DESCRIPTION
+.Nm
+will read and parse an html file and then display the output based on the specified CSS selector.
+.Bl -tag -width Ds
+.It Fl a
+.Nm
+will output the specified attribute for all matching elements. Multiple attributes can be
+specified in a comma separated list.  If a matching element does not have any specified
+attributes, it will be skipped.
+.It Fl c
+.Nm
+will output comments from any matching selectors.  If 
+.Fl d
+is used, it will output everything except the comments.
+.It Fl d
+.Nm
+will invert the selection, effectly deleting the matching elements from the output.
+.It Fl f
+.Nm
+will specify the HTML file to parse.
+.It Fl h
+.Nm
+will output the usage banner.
+.It Fl d
+is used it will output everything execpt the text elements.
+.It Fl p
+.Nm
+will attempt to output all matching elements in a pretty formatted way with proper indention.
+.It Fl t
+.Nm
+will output text elements from any matching selectors. If
+.Fl d
+is used, it will output everything except the text elements.
+.El
+.Sh CSS SELECTOR
+.Nm
+will accept most CSS selector formats including: HTML Element; Class and Id.
+It will accept subselecctors matching attributes of a CSS element.  Selector
+options the would match the DOM state (often preceeded by : or ::) are not
+accepted. It is recommended to contain the CSS selector in single quotes to 
+protect it from shell interpretation.  The format for an element selector is:
+.Pp
+.Bd -literal -offset indent
+[element][.class|#id][attributes]
+.Ed
+.Pp
+If
+.Em element
+is not specified it is assumed to be
+.Em *
+(all elements).
+.Em Class
+(preceeded by a period)
+and
+.Em id
+(preceeded by a
+.Qq #
+) can be added to further limit the selection.
+.Em Attributes
+are enclosed in square
+.Qo
+[
+.Qc
+and
+.Qo
+]
+.Qc
+brackets.  Attributs can be specified to further limit selection. See
+.Sx ATTRIBUTES
+for options.
+.Ss
+.Bl -tag
+.It *
+Match all elements.
+.It element
+Match a specific element.
+.It .class
+Match any element with specified Class.
+.It #id
+Match any element with Specified ID.
+.It element.class
+Match a specific element that contains the specific class.
+.It element#id
+Match a specific element that contains the specific id.
+.El
+.Pp
+Elements can be further subselected by specifing multiple elements and an
+element selection operator.
+.Bl -tag
+.It element1, element2
+Match all elements that match element1 and element2.
+.It element1 SPC element2
+Match all elements of element2 inside element1.
+.It element1 > element2
+Match all elements of element2 with a direct parent of element1.
+.It element1 + element2
+Match the first element of element2 that is placed immediatly after element1.
+.It element1 ~ element2
+Match every element2 that is preceeded by element1.
+.It
+.Sh ATTRIBUTES
+Attributes can be selected by presence or their value.
+.Bl -tag
+.It attribute
+Select the element if the attribute is present in the element regardless of
+value.
+.It attribute = value
+Select the element if the attribute matches the value.  Values should be
+enclosed within quotes
+.So
+"
+.Sc
+.It attribute ~= value
+Select the elements with the attribute containing the word
+.Qq value .
+.It attribute |= value
+Select the elements with the value equal to
+.Qq value
+or starting with
+.Qq value-
+.It attribute ^= value
+Select the elements where the attribute begins with
+.Qq value .
+.It attribute $= value
+Select the elements where the attribute ends with
+.Qq value .
+.It attribute *= value
+Select the elements where the attribute contains the substring
+.Qq value .
+.El
+.Sh EXIT STATUS
+.Nm
+will exist with a return value of 0 on successful parse and display.
+On failure it will exit with a non-zero value.
+.Sh EXAMPLES
+Extract meta tags
+.Pp
+.Bd -literal -offset indent
+hq -f htmlfile 'meta'
+.Ed
+.Pp
+Extract meta tags with the attribute
+.Qq name
+equal to 
+.Qq description
+.Bd -literal -offset indent
+hq -f htmlfile 'meta[name="description"]'
+.Ed
+.Pp
+Extract text
+.Bd -literal -offset indent
+hq -f htmlfile -t ''
+.Ed
+.Pp
+Extract all tags
+.Bd -literal -offset indent
+hq -f htmlfile '*'
+.Ed
+.Pp
+Extract just the javascript
+.Bd -literal -offset indent
+hq -f htmlfile 'javascript'
+.Ed
+.Pp
+Extract text and elements with the class of 'article'
+.Bd -literal -offset indent
+hq -f htmlfile '.article'
+.Ed
+.Pp
+Extract just text from class 'article'
+.Bd -literal -offset indent
+hq -f htmlfile -t '.article'
+.Ed
+.Pp
+Extract all DIV and P elements
+.Bd -literal -offset indent
+hq -f htmlfile 'div, p'
+.Ed
+.Pp
+Extract all P inside DIV elements
+.Bd -literal -offset indent
+hq -f htmlfile 'div p'
+.Ed
+.Pp
+Extract all P where the parent is a DIV element
+.Bd -literal -offset indent
+hq -f htmlfile 'div > p'
+.Ed
+.Pp
+Extract first P that is placed immediately after DIV element
+.Bd -literal -offset indent
+hq -f htmlfile 'div + p'
+.Ed
+.Pp
+Extract every P element that is preceded by a DIV element
+.Bd -literal -offset indent
+hq -f htmlfile 'div ~ p'
+.Ed
+.Sh AUTHORS
+.An Michael Graves
+.Sh CAVEATS
+.Nm
+is not an HTML linting application. It will not fix broken or badly formated
+HTML documents.
