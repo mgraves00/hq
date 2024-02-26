@@ -22,7 +22,7 @@ $(PROG): $(OBJS)
 
 install:
 	$(INSTALL_PROGRAM) $(PROG) $(DESTDIR)$(BINDIR)
-	$(INSTALL_MAN) $(MAN) $(DESTDIR)$(MANDIR)
+	$(INSTALL_MAN) $(.CURDIR)/$(MAN) $(DESTDIR)$(MANDIR)
 
 regress:
 	# do nothing
