@@ -40,5 +40,5 @@ distclean:
 	rm -f config.log config.h Makefile.configure
 
 hq.md: hq.1
-	mandoc -T markdown hq.1 > hq.md
+	mandoc -T markdown ${.CURDIR}/hq.1 > ${.CURDIR}/../hq.md
 
