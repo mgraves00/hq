@@ -17,7 +17,9 @@
 
 #include <sys/queue.h>
 
+#include <err.h>
 #include <stdio.h>
+#include <string.h>
 #include <strings.h>
 #include <stdlib.h>
 
@@ -34,7 +36,7 @@
 } while(0)
 
 void print_attr(struct attr_elem *a, int);
-void print_elem(struct dom_elem *e, int, int);
+void print_elem(struct dom_elem *e, int, int, char *);
 void print_attr2(struct attr_elem *a, int);
 void print_elem2(struct dom_elem *e, int);
 void print_elem_flags(struct dom_elem *e);
@@ -97,27 +99,27 @@ print_attr(struct attr_elem *a, int flags)
 	return;
 }
 void
-print_elem(struct dom_elem *e, int flags, int rec)
+print_elem(struct dom_elem *e, int flags, int rec, char *attr)
 {
 	struct attr_elem *a;
 	struct dom_elem *c;
 
-	if (!((flags & FLAG_TEXT) || (flags & FLAG_COMMENT))) {
+	if (!((flags & FLAG_TEXT) || (flags & FLAG_COMMENT) || (flags & FLAG_ATTR))) {
 		PRETTY_INDENT(flags,rec);
 	}
 	switch(e->type) {
 		case DOMF_DOCT:
-			if ( is_match(e->match, FLAG_ELEM, flags)) {
+			if ( is_match(e->match, FLAG_ELEM, flags) && ! (flags & FLAG_ATTR)) {
 				printf("<!DOCTYPE %s>\n",e->value);
 			}
 			break;
 		case DOMF_COMM:
-			if ( is_match(e->match, FLAG_COMMENT, flags)) {
+			if ( is_match(e->match, FLAG_COMMENT, flags) && ! (flags & FLAG_ATTR)) {
 				printf("<!-- %s -->\n",e->value);
 			}
 			break;
 		case DOMF_TEXT:
-			if ( is_match(e->match, FLAG_TEXT, flags)) {
+			if ( is_match(e->match, FLAG_TEXT, flags) && ! (flags & FLAG_ATTR)) {
 				if (flags & FLAG_PRETTY) {
 					clean_str(e->value);
 				}
@@ -128,17 +130,37 @@ print_elem(struct dom_elem *e, int flags, int rec)
 			break;
 		case DOMF_ELEM:
 			if ( is_match(e->match, FLAG_ELEM, flags)) {
-				printf("<%s",e->name);
-				TAILQ_FOREACH(a, &e->attrs, next) {
-					printf(" ");
-					print_attr(a, flags);
-				}
-				if (e->flags & ELEM_INLINE) {
-					printf(" />\n");
+				if (! (flags & FLAG_ATTR)) {
+					printf("<%s",e->name);
+					TAILQ_FOREACH(a, &e->attrs, next) {
+						printf(" ");
+						print_attr(a, flags);
+					}
+					if (e->flags & ELEM_INLINE) {
+						printf(" />\n");
+					} else {
+						printf(">");
+						if ((flags & ELEM_NOEND) != ELEM_NOEND)
+							printf("\n");
+					}
 				} else {
-					printf(">");
-					if ((flags & ELEM_NOEND) != ELEM_NOEND)
+					int f = 0;
+					char *p, *s = NULL, *last;
+					if ((s = strdup(attr)) == NULL)
+						err(1,"strdup");
+					for ((p = strtok_r(s,",",&last)); p!=NULL; (p = strtok_r(NULL,",",&last))) {
+						TAILQ_FOREACH(a, &e->attrs, next) {
+							if (strcasecmp(p, a->key) == 0) {
+								print_attr(a,flags);
+								printf(" ");
+								f = 1;
+							}
+						}
+					} 
+					if (f != 0)
 						printf("\n");
+					if (s)
+						free(s);
 				}
 			}
 			break;
@@ -146,9 +168,9 @@ print_elem(struct dom_elem *e, int flags, int rec)
 			break;
 	}
 	TAILQ_FOREACH(c, &e->children, next) {
-		print_elem(c, flags, rec+1);
+		print_elem(c, flags, rec+1, attr);
 	}
-	if ( is_match(e->match, FLAG_ELEM, flags)) {
+	if ( is_match(e->match, FLAG_ELEM, flags) && ! (flags & FLAG_ATTR)) {
 		if (e->type == DOMF_ELEM) {
 			if (unterminated_element(e->name) == 0) {
 				if (! (e->flags & ELEM_INLINE)) {
@@ -195,7 +217,7 @@ print_elem2(struct dom_elem *e, int flags)
 }
 
 void
-print_dom(struct domhead *dh, int flags)
+print_dom(struct domhead *dh, int flags, char *attr)
 {
 	struct dom_elem *e;
 
@@ -203,7 +225,7 @@ print_dom(struct domhead *dh, int flags)
 		if (flags & FLAG_X)
 			print_elem2(e,flags);
 		else
-			print_elem(e,flags,0);
+			print_elem(e,flags,0,attr);
 	}
 	return;
 }

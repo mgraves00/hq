@@ -36,7 +36,7 @@ extern char *__progname;
 void
 usage(void)
 {
-	printf("%s: [-cdhpt] [-f html_file] css_selector\n",__progname);
+	printf("%s: [-cdhpt] [-a attr_name[,attr_name [-f html_file] css_selector\n",__progname);
 	exit(1);
 }
 
@@ -48,13 +48,19 @@ main(int argc, char **argv)
 	int ch, fd;
 	int flags=FLAG_NONE;
 	int rc=0;
-	char *fname = "";
-	char *selector = "";
+	char *fname = NULL;
+	char *selector = NULL;
+	char *attrname = NULL;
 	char *raw = NULL;
 	size_t raw_len = 0;
 
-	while ((ch = getopt(argc, argv, "cdf:hptx")) != -1 ) {
+	while ((ch = getopt(argc, argv, "a:cdf:hptx")) != -1 ) {
 		switch (ch) {
+			case 'a':
+				flags |= FLAG_ATTR;
+				if ((attrname = strdup(optarg)) == NULL)
+					errx(1,"strdup");
+				break;
 			case 'c':
 				flags |= FLAG_COMMENT;
 				break;
@@ -105,6 +111,8 @@ main(int argc, char **argv)
 	rc = parse_sel(&sh, selector);
 	if (rc != 0)
 		errx(1,"bad selector");
+	if (selector)
+		free(selector);
 
 	if (flags & FLAG_X) {
 		printf("selector: ");
@@ -114,13 +122,16 @@ main(int argc, char **argv)
 	rc = parse_dom(&dh, raw, raw_len);
 	if (rc != 0)
 		errx(1,"file parse errors");
-	free(raw);
+	if (raw)
+		free(raw);
 
 	rc = modify_dom(&dh, &sh, flags);
 	if (rc != 0)
 		errx(1,"modify errors");
 
-	print_dom(&dh, flags);
+	print_dom(&dh, flags, attrname);
+	if (attrname)
+		free(attrname);
 //	free_dom(&dh);
 //	free_sel(&sh);
 	return(0);

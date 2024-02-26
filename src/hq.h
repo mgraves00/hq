@@ -40,15 +40,16 @@ struct dom_elem {
 	struct domhead			*head;
 };
 
-#define FLAG_TEXT			0x01
-#define FLAG_COMMENT		0x02
-#define FLAG_ELEM			0x04
+#define FLAG_TEXT			0x0001
+#define FLAG_COMMENT		0x0002
+#define FLAG_ELEM			0x0004
 /* command flags */
-#define FLAG_NONE			0x10
-#define FLAG_PRETTY			0x20
-#define FLAG_DEL			0x40
-#define FLAG_X				0x80
-#define FLAG_ALL			0x0f
+#define FLAG_NONE			0x0100
+#define FLAG_PRETTY			0x0200
+#define FLAG_DEL			0x0400
+#define FLAG_ATTR			0x0800
+#define FLAG_X				0x8000
+#define FLAG_ALL			0x00ff
 #define NOT_FLAG(f)			(FLAG_ALL^(f))
 
 
@@ -93,7 +94,7 @@ struct sel {
 TAILQ_HEAD(selhead, sel);
 
 /* print.c */
-void print_dom(struct domhead*, int);
+void print_dom(struct domhead*, int, char *);
 void print_sel(struct selhead *);
 /* modify.c */
 int modify_dom(struct domhead *dh, struct selhead *sh, int);
