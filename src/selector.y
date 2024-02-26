@@ -17,13 +17,19 @@
 
 %{
 
+#include "config.h"
+
 #include <sys/types.h>
+#if HAVE_SYS_QUEUE
 #include <sys/queue.h>
+#endif
 #include <sys/socket.h>
 #include <sys/stat.h>
 
 #include <ctype.h>
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>

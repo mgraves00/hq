@@ -97,7 +97,7 @@ TAILQ_HEAD(selhead, sel);
 void print_dom(struct domhead*, int, char *);
 void print_sel(struct selhead *);
 /* modify.c */
-int modify_dom(struct domhead *dh, struct selhead *sh, int);
+int modify_dom(struct domhead *, struct selhead *, int);
 /* parse.y */
 int parse_dom(struct domhead*, char *, size_t);
 /* selector.y */
@@ -108,20 +108,20 @@ struct dom_elem *alloc_elem(void);
 struct attr_elem *alloc_attr(void);
 struct sel *alloc_sel(void);
 struct sel_attr *alloc_sel_attr(void);
-struct sel_attr *find_attr(struct sel *s, char *name);
+struct sel_attr *find_attr(struct sel *, char *);
 int is_top(struct dom_elem *);
 char *extract_str(char *, char *);
-void init_buf(char *buf, size_t sz);
-int lgetc(int c);
-int lungetc(int c);
+void init_buf(char *, size_t );
+int lgetc(int );
+int lungetc(int );
 int peek_back(void);
 int yyerror(const char *, ...)
 	__attribute__((__format__ (printf, 1, 2)))
 	__attribute__((__nonnull__ (1)));
 int unterminated_element(char *elem);
-struct dom_elem *next_elem(struct dom_elem *e);
-struct dom_elem *prev_elem(struct dom_elem *e);
-char *clean_str(char *str);
+struct dom_elem *next_elem(struct dom_elem *);
+struct dom_elem *prev_elem(struct dom_elem *);
+char *clean_str(char *);
 
 extern int errors;
 extern char *raw_data;

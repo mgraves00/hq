@@ -13,9 +13,3 @@ based on the specified CSS selector.
 All sources use the 2 clause BSD license.
 See the [LICENSE](LICENSE) file for details.
 
-# TODO
-- add ability to print specific element attribute / value
-
-# Known issues
-- currently only tested / compiled on OpenBSD
-
