@@ -82,6 +82,7 @@ doctype		: DOCTYPE STRING {
 				e->value = $2;
 				e->type = DOMF_DOCT;
 				e->line = yylval.lineno;
+				e->parent = e;				// top points to itself
 				TAILQ_INSERT_HEAD(head, e, next);	// doctype will always be part of the head
 		 	}
 		 	;

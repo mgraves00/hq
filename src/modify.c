@@ -75,6 +75,8 @@ check_element(struct dom_elem *e, struct selhead *sh, int f)
  * selection EOP_* criteria.
  *
  */
+#define MATCH_NAME(_sn,_en) \
+		((strcmp("*",_sn) == 0) || (strcasecmp(_sn, _en) == 0))
 int
 match_sel(struct dom_elem *e, struct selhead *sh, int f)
 {
@@ -119,8 +121,9 @@ match_sel(struct dom_elem *e, struct selhead *sh, int f)
 
 	// check for name match
 	TAILQ_FOREACH(s, sh, next) {
-		if (strcmp("*",s->elem) == 0 ||
-			strcasecmp(s->elem, e->name) == 0) {
+//		if (strcmp("*",s->elem) == 0 ||
+//			strcasecmp(s->elem, e->name) == 0) {
+		if (MATCH_NAME(s->elem, e->name)) {
 			// no selector attributes.  just match on names. simple match.
 			if (TAILQ_EMPTY(&s->attrs)) {
 				match = 1;
@@ -208,7 +211,8 @@ found:
 							match = 0;
 						} else {
 							c = e->parent;
-							if (strcasecmp(c->name, sp->elem) != 0) {
+//							if (strcasecmp(c->name, sp->elem) != 0) {
+							if (!MATCH_NAME(sp->elem, c->name)) {
 								match = 0;
 							}
 						}
@@ -235,7 +239,8 @@ found:
 						if (c == NULL) {
 							match = 0;
 						} else {
-							if (strcasecmp(c->name, sp->elem) != 0) {
+//							if (strcasecmp(c->name, sp->elem) != 0) {
+							if (!MATCH_NAME(sp->elem, c->name)) {
 								match = 0;
 							}
 						}
@@ -248,7 +253,8 @@ found:
 						if (c == NULL) {
 							match = 0;
 						} else {
-							if (strcasecmp(c->name, sp->elem) != 0) {
+//							if (strcasecmp(c->name, sp->elem) != 0) {
+							if (!MATCH_NAME(sp->elem, c->name)) {
 								match = 0;
 							}
 						}
