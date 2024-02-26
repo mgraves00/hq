@@ -206,25 +206,37 @@ next_elem(struct dom_elem *e)
 }
 
 /* 
+ * update string in place.
  * remove any leading or trailing space, tabs, newlines
+ * remove internal new lines
+ * replace multiple spaces/tabs with single space
  */
 char *
 clean_str(char *str)
 {
-	char *s, *e, *n;
-	size_t l;
-	s = str;
-	/* skip leading spaces */
-	while (*s == ' ' || *s == '\t' || *s == '\n') {
-		s++;
+	char *h, *p, *t;
+	h = p = str;
+	/* skip leading spaces and newlines*/
+	while (isspace(*p)) {
+		p++;
 	}
-	/* skip trailing spaces */
-	l = strlen(str);
-	e = str+l-1;
-	while (*e == ' ' || *e == '\t' || *e == '\n') {
-		e--;
+	while (*p != '\0') {
+		while (isspace(*p) && *p != '\0') {
+			p++;
+		}
+		if (*p == '\0') {
+			*h='\0';
+		} else {
+			t = p-1;
+			if (*t == ' ' || *t == '\t' || *t == '\n') {
+				*h = ' '; 
+				h++;
+			}
+			*h = *p;
+			h++;
+			p++;
+		}
 	}
-	e++; // forward to the last unwanted char
-	n = extract_str(s,e);
-	return(n);
+	*h='\0';
+	return(str);
 }

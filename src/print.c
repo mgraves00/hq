@@ -101,7 +101,6 @@ print_elem(struct dom_elem *e, int flags, int rec)
 {
 	struct attr_elem *a;
 	struct dom_elem *c;
-	char *s;
 
 	if (!((flags & FLAG_TEXT) || (flags & FLAG_COMMENT))) {
 		PRETTY_INDENT(flags,rec);
@@ -120,11 +119,7 @@ print_elem(struct dom_elem *e, int flags, int rec)
 		case DOMF_TEXT:
 			if ( is_match(e->match, FLAG_TEXT, flags)) {
 				if (flags & FLAG_PRETTY) {
-					s = clean_str(e->value);
-					if (s != NULL) {
-						free(e->value);
-						e->value = s;
-					}
+					clean_str(e->value);
 				}
 				printf("%s",e->value);
 				if (flags & FLAG_PRETTY)
@@ -185,9 +180,7 @@ print_elem2(struct dom_elem *e, int flags)
 	} else {
 		printf("\t parent: %s\n",e->parent->name);
 	}
-//	printf("\t type: %s\n",elem_type_str[e->type]);
 	printf("\t flags: "); print_elem_flags(e);
-//	printf("\t match: %d\n",e->match);
 	if (e->value != NULL) {
 		printf("\t value: %s\n",e->value);
 	}
