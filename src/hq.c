@@ -94,14 +94,13 @@ main(int argc, char **argv)
 	}
 	argc -= optind;
 	argv += optind;
-
 	if (argc < 1) {
 		usage();
 	}
 	if ((selector = strdup(argv[0])) == NULL)
 		err(1, "strdup");
 	
-	if (fname[0] == '\0') {
+	if (fname == NULL) {
 		fd = STDIN_FILENO;
 		read_stdin(fd, &raw, &raw_len);
 	} else {
