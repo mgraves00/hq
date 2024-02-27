@@ -177,9 +177,9 @@ unterminated_element(char *name)
 //		((strcasecmp("li", name)) == 0) ||
 		((strcasecmp("br", name)) == 0) ||
 		((strcasecmp("hr", name)) == 0) ||
-		((strcasecmp("img", name)) == 0)
-//		((strcasecmp("link", name)) == 0) ||
-//		((strcasecmp("meta", name)) == 0)
+		((strcasecmp("img", name)) == 0) ||
+		((strcasecmp("link", name)) == 0) ||
+		((strcasecmp("meta", name)) == 0)
 		) {
 		return(1);
 	}
